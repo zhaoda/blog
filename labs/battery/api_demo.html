@@ -1,0 +1,155 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=no,initial-scale=1,minimum-scale=1,maximum-scale=1"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="format-detection" content="telephone=no,address=no"/>
+    <title>Battery Demo</title>
+    <link href="style-min.css" rel="stylesheet"/>
+    <link href="demo-min.css" rel="stylesheet"/>
+
+    <style>
+        .battery_box {
+            background: url(battery.png) 3px 0 no-repeat;
+            background-size:180px;
+			margin: 0 auto;
+            width: 184px;
+            height: 81px;
+            position: relative;
+        }
+
+        .battery_bg {
+            background: url(battery.png) -4px -89px no-repeat;
+            background-size:180px;
+			margin: 0 auto;
+            position: absolute;
+            top: 5px;
+            left: 19px;
+            max-width: 140px;
+            height: 75px;
+            z-index: -1;
+        }
+    </style>
+</head>
+
+<body class="left-in">
+<header class="header">
+    <h1 class="title" title="Demo示范">Demo示范</h1>
+</header>
+<div class="main main_3">
+    <div class="main_3_box">
+        <h2 class="title">电池管家</h2>
+        <div id="scroller" style="position:absolute;top:0;right:0;bottom:0;left:0;">
+            <div class="battery_box" style="margin-top:7%">
+                <div id="_batteryId" class="battery_bg"></div>
+            </div>
+            <div id="_batteryTxtId"></div>
+        </div>
+        <div id="album_pop">
+            <div class="pop_bg"></div>
+            <div class="pop bg">
+                <p>不支持电池功能<br />demo无法正常使用</p>
+                <a id="album_pop_btn" class="pop_btn" href="javascript:void(0);">返 回</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="loading">
+    <div class="loading">
+        <div class="loading_img"></div>
+    </div>
+</div>
+
+<script>
+    var runBattery = function(battery) {
+        console.log(battery);
+        var intervalId = 0;
+        var batteryWidth = 210 / 1.5 * battery.level;
+        document.getElementById('_batteryId').style.width = 210 / 1.5 * battery.level + "px";
+        if (battery.level < 1) {
+            document.getElementById('_batteryTxtId').innerHTML = "电量未满，插上充电器试试";
+        } else if (battery.level == 1) {
+            document.getElementById('_batteryTxtId').innerHTML = "电量满，不需要充电";
+        }
+        battery.onchargingchange = function () {
+            clearInterval(intervalId);
+            document.getElementById('_batteryId').style.width = 210 / 1.5 * battery.level + "px";
+            batteryWidth = 210 / 1.5 * battery.level;
+            if (battery.charging && battery.level < 1) {
+                intervalId = setInterval(loop, 30);
+            }
+            document.getElementById('_batteryId').style.width = 210 / 1.5 * battery.level + "px";
+            if (battery.level < 1) {
+                document.getElementById('_batteryTxtId').innerHTML = "电量未满，插上充电器试试";
+            } else if (battery.level == 1) {
+                document.getElementById('_batteryTxtId').innerHTML = "已充满，不需要充电了";
+            }
+        };
+
+        battery.onlevelchange = function () {
+            document.getElementById('_batteryId').style.width = 210 / 1.5 * battery.level + "px";
+        };
+        /*
+         battery.onchargingtimechange = function () {
+         document.querySelector('#chargingTime').textContent = '充满所需时间: ' + battery.chargingTime / 60;
+         }
+
+         battery.ondischargingtimechange = function () {
+         document.querySelector('#dischargingTime').textContent = '可用时间: ' + battery.dischargingTime / 60;
+         };
+
+         function updateBatteryInfo(){
+         document.querySelector('#charging').textContent = '是否在充电: ' + (battery.charging ? '充电中' : '未充电');
+         document.querySelector('#level').textContent = '电池电量: ' + battery.level;
+         /*document.querySelector('#chargingTime').textContent = '充满所需时间: ' + (battery.chargingTime / 60);
+         document.querySelector('#dischargingTime').textContent = '可用时间: ' + battery.dischargingTime / 60;
+         }*/
+
+        if (battery.charging && battery.level < 1) {
+            intervalId = setInterval(loop, 30);
+        }
+        function loop() {
+            if (battery.level == 1) {
+                clearInterval(intervalId);
+            } else {
+                if (batteryWidth >= 210 / 1.5) {
+                    batteryWidth = 210 / 1.5 * battery.level;
+                } else {
+                    batteryWidth += 2;
+                }
+            }
+            if (battery.level < 1) {
+                document.getElementById('_batteryTxtId').innerHTML = "充电中...";
+            } else if (battery.level == 1) {
+                document.getElementById('_batteryTxtId').innerHTML = "电量已满";
+            }
+            document.getElementById('_batteryId').style.width = batteryWidth + "px";
+        }
+    };
+
+    if (navigator.battery || navigator.webkitBattery) {
+        var battery = navigator.battery || navigator.webkitBattery;
+        runBattery(battery);
+    } else if(navigator.getBattery){
+        navigator.getBattery().then(function(battery){
+            runBattery(battery);
+        });
+    } else {
+        document.getElementById("loading").className = 'none';
+        document.getElementById('scroller').innerHTML = '';
+        document.getElementById('album_pop').style.display = 'block';
+        document.getElementById('album_pop_btn').onclick = function () {
+            document.getElementById('album_pop').style.display = 'none';
+        };
+    }
+    window.addEventListener('load', function () {
+        document.getElementById("loading").className = 'none';
+    }, false);
+</script>
+</body>
+</html>
